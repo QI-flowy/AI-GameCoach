@@ -1,0 +1,19 @@
+[project]
+name = "cs2-ai-coach-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.6.0",
+    "python-multipart>=0.0.9",
+    "aiofiles>=23.2.1",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["api", "models", "pipeline", "llm", "video"]

@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+
+# Runtime data
+backend/uploads/
+backend/data/screenshots/
+backend/clips/
+backend/data/
+!backend/data/.gitkeep
+
+# Frontend build
+frontend/.next/
+frontend/out/
+frontend/dist/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project scripts (kept for dev)
+scripts/
