@@ -10,10 +10,10 @@ from models.report import DotaAnalysisReport, AnalysisStatus
 from llm.qwen_client import QwenClient
 from pipeline.analyzer import DotaAnalyzer, STATUSES
 
-# ─── 路径 ───
+# ─── 路径（D 盘，空间充裕） ───
 BASE = os.path.dirname(os.path.dirname(__file__))
-UPLOAD_DIR = os.path.join(BASE, "uploads")
-SCREENSHOT_DIR = os.path.join(BASE, "data", "screenshots")
+UPLOAD_DIR = r"D:\dota-coach\uploads"
+SCREENSHOT_DIR = r"D:\dota-coach\screenshots"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
@@ -73,8 +73,28 @@ async def start_analysis(
 
     tid = f"dota_{int(time.time())}_{file.filename[:12]}"
     vp = os.path.join(UPLOAD_DIR, f"{tid}_{file.filename}")
-    with open(vp, "wb") as f:
-        f.write(await file.read())
+
+    # 流式写入磁盘，避免大文件撑爆内存
+    CHUNK = 1024 * 1024  # 1MB 一块
+    MAX = 20 * 1024 * 1024 * 1024  # 20GB 硬限制
+    try:
+        with open(vp, "wb") as f:
+            total = 0
+            while True:
+                chunk = await file.read(CHUNK)
+                if not chunk:
+                    break
+                f.write(chunk)
+                total += len(chunk)
+                if total > MAX:
+                    os.remove(vp)
+                    raise HTTPException(400, "文件超过 20GB 限制")
+    except HTTPException:
+        raise
+    except Exception as e:
+        if os.path.exists(vp):
+            os.remove(vp)
+        raise HTTPException(400, f"上传失败: {e}")
 
     asyncio.create_task(_run(tid, vp))
     return {"task_id": tid, "status": "started"}

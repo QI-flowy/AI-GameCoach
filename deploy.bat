@@ -36,15 +36,29 @@ echo [3/5] 检测 FFmpeg...
 where ffmpeg >nul 2>&1
 if %errorlevel% neq 0 (
     echo ⚠ FFmpeg 未在 PATH 中找到
-    echo   请安装 FFmpeg: https://ffmpeg.org/download.html
-    echo   然后添加到系统 PATH 环境变量
-    echo.
-    echo   或者手动设置 FFMPEG_PATH 环境变量指向 ffmpeg/bin 目录
-    echo.
-    pause
-    exit /b 1
+    if exist C:\ffmpeg\bin\ffmpeg.exe (
+        echo ✅ 使用 C:\ffmpeg\bin\ffmpeg.exe
+    ) else (
+        echo.
+        echo 正在自动下载 FFmpeg...
+        echo 如果下载失败，请手动下载并添加到 PATH
+        echo 下载地址: https://ffmpeg.org/download.html
+        echo.
+        echo 下载链接: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+        echo.
+        echo 下载完成后:
+        echo   1. 解压到 C:\ffmpeg\
+        echo   2. 将 C:\ffmpeg\bin 添加到系统 PATH
+        echo.
+        echo 现在是否打开下载页面? (Y/N)
+        set /p OPEN_DL=
+        if /i "%OPEN_DL%"=="Y" (
+            start "" "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+        )
+    )
+) else (
+    echo ✅ FFmpeg 可用
 )
-ffmpeg -version | findstr "ffmpeg" >nul && echo ✅ FFmpeg 可用
 
 :: ─── 4. 安装后端依赖 ───
 echo [4/5] 安装后端依赖...

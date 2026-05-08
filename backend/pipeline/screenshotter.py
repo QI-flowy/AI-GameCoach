@@ -4,16 +4,36 @@ from pathlib import Path
 
 INTERVAL = 30
 
-# 检测 ffmpeg/ffprobe 是否可用
-FFMPEG_PATH = "C:/Users/13910/Downloads/ffmpeg-master-latest-win64-gpl-shared/ffmpeg-master-latest-win64-gpl-shared/bin"
-_FFMPEG = shutil.which("ffmpeg") or f"{FFMPEG_PATH}/ffmpeg.exe"
-_FFPROBE = shutil.which("ffprobe") or f"{FFMPEG_PATH}/ffprobe.exe"
+# 动态查找 FFmpeg/FFprobe
+_FFMPEG = shutil.which("ffmpeg")
+_FFPROBE = shutil.which("ffprobe")
 
 
 def _check():
+    global _FFMPEG, _FFPROBE
+    if _FFMPEG and _FFPROBE:
+        return
+    # 尝试常见安装路径
+    if not _FFMPEG:
+        for p in [r"C:\ffmpeg\bin\ffmpeg.exe",
+                  r"D:\ffmpeg-8.1.1-essentials_build\ffmpeg-8.1.1-essentials_build\bin\ffmpeg.exe",
+                  r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"]:
+            if Path(p).exists():
+                _FFMPEG = p
+                break
+    if not _FFPROBE:
+        for p in [r"C:\ffmpeg\bin\ffprobe.exe",
+                  r"D:\ffmpeg-8.1.1-essentials_build\ffmpeg-8.1.1-essentials_build\bin\ffprobe.exe",
+                  r"C:\Program Files\ffmpeg\bin\ffprobe.exe"]:
+            if Path(p).exists():
+                _FFPROBE = p
+                break
     if not _FFMPEG or not _FFPROBE:
         raise RuntimeError(
-            "FFmpeg/FFprobe 未找到。请安装 FFmpeg 并添加到 PATH。"
+            "FFmpeg/FFprobe 未找到。\n"
+            "1. 下载: https://ffmpeg.org/download.html\n"
+            "2. 解压到 C:\\ffmpeg\\\n"
+            "3. 或将 ffmpeg.exe/ffprobe.exe 添加到系统 PATH\n"
         )
 
 
@@ -35,7 +55,12 @@ def duration(path):
         ],
         capture_output=True, text=True,
     )
-    return float(result.stdout.strip())
+    if result.returncode != 0:
+        raise RuntimeError(f"FFprobe 无法读取视频: {result.stderr.strip()}")
+    try:
+        return float(result.stdout.strip())
+    except ValueError:
+        raise RuntimeError(f"无法获取视频时长: {result.stdout.strip()}")
 
 
 class Screenshotter:
