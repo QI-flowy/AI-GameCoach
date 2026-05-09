@@ -1,0 +1,89 @@
+{
+  "version": "7.41c",
+  "patch_notes_url": "https://www.dota2.com/patches/",
+  "popular_heroes": [
+    {
+      "name": "pudge",
+      "localized_name": "帕吉",
+      "win_rate": 51.1,
+      "pick_rate": 24.3
+    },
+    {
+      "name": "phantom_assassin",
+      "localized_name": "幻影刺客",
+      "win_rate": 50.5,
+      "pick_rate": 21.8
+    },
+    {
+      "name": "zeus",
+      "localized_name": "宙斯",
+      "win_rate": 52.7,
+      "pick_rate": 18.2
+    },
+    {
+      "name": "juggernaut",
+      "localized_name": "剑圣",
+      "win_rate": 51.9,
+      "pick_rate": 17.5
+    },
+    {
+      "name": "invoker",
+      "localized_name": "祈求者",
+      "win_rate": 49.8,
+      "pick_rate": 16.9
+    },
+    {
+      "name": "crystal_maiden",
+      "localized_name": "水晶室女",
+      "win_rate": 50.3,
+      "pick_rate": 15.7
+    },
+    {
+      "name": "axe",
+      "localized_name": "斧王",
+      "win_rate": 53.6,
+      "pick_rate": 14.2
+    },
+    {
+      "name": "sniper",
+      "localized_name": "狙击手",
+      "win_rate": 48.9,
+      "pick_rate": 13.8
+    },
+    {
+      "name": "spirit_breaker",
+      "localized_name": "裂魂人",
+      "win_rate": 54.2,
+      "pick_rate": 12.5
+    },
+    {
+      "name": "lina",
+      "localized_name": "莉娜",
+      "win_rate": 49.5,
+      "pick_rate": 12.1
+    }
+  ],
+  "top_bans": [
+    {
+      "name": "蝙蝠骑士",
+      "ban_rate": 22.8
+    },
+    {
+      "name": "兽王",
+      "ban_rate": 21.0
+    },
+    {
+      "name": "德鲁伊",
+      "ban_rate": 20.6
+    },
+    {
+      "name": "石鳞剑士",
+      "ban_rate": 19.5
+    },
+    {
+      "name": "风行者",
+      "ban_rate": 15.8
+    }
+  ],
+  "cached_at": "2026-05-09T15:16:30.922329"
+}

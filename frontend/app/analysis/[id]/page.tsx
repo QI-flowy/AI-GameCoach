@@ -7,6 +7,7 @@ import VideoPlayer from "@/components/dashboard/VideoPlayer";
 import TimelineSidebar from "@/components/dashboard/TimelineSidebar";
 import AnalysisPanel from "@/components/dashboard/AnalysisPanel";
 import LineupCard from "@/components/dashboard/LineupCard";
+import DotaMetaPanel from "@/components/dashboard/DotaMetaPanel";
 import { updateHeroes } from "@/lib/api-client";
 import { Clock, Loader2 } from "lucide-react";
 
@@ -166,9 +167,10 @@ export default function AnalysisPage() {
             </div>
           </div>
 
-          {/* 右侧：时间轴切片 */}
+          {/* 右侧：版本信息 + 时间轴切片 */}
           <div className="w-64 flex-shrink-0 border-l border-zinc-800 bg-zinc-900/30 overflow-y-auto">
-            <div className="p-3">
+            <div className="p-3 space-y-3">
+              {isDota2 && <DotaMetaPanel />}
               <TimelineSidebar
                 clips={report.timeline}
                 currentTime={activeClip ? activeClip.timestamp : 0}
