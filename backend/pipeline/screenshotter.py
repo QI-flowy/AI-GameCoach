@@ -2,7 +2,7 @@
 import asyncio, json, shutil, subprocess
 from pathlib import Path
 
-INTERVAL = 30
+INTERVAL = 15
 
 # 动态查找 FFmpeg/FFprobe
 _FFMPEG = shutil.which("ffmpeg")

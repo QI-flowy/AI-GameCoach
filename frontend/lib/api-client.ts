@@ -15,7 +15,9 @@ export interface KeyClip {
 export interface DotaAnalysisReport {
   task_id: string; video_duration: number; total_frames: number;
   frames: FrameAnalysis[]; timeline: KeyClip[];
-  summary: string; coach_advice: string[]; error?: string;
+  summary: string; coach_advice: string[];
+  radiant_heroes: string[]; dire_heroes: string[]; lineup_analysis: string;
+  error?: string;
 }
 
 export async function startAnalysis(file: File) {
@@ -31,6 +33,16 @@ export async function getAnalysisStatus(tid: string) {
 }
 export async function getAnalysisReport(tid: string) {
   var r = await fetch(B + "/api/analysis/" + tid + "/report");
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+export async function updateHeroes(tid: string, radiant: string[], dire: string[]) {
+  var r = await fetch(B + "/api/analysis/" + tid + "/heroes", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ radiant_heroes: radiant, dire_heroes: dire }),
+  });
   if (!r.ok) throw new Error(await r.text());
   return r.json();
 }

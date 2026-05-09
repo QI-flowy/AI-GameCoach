@@ -114,6 +114,16 @@ async def analysis_report(tid: str):
     return reports[tid].model_dump()
 
 
+@app.put("/api/analysis/{tid}/heroes")
+async def update_heroes(tid: str, body: dict):
+    if tid not in reports:
+        raise HTTPException(404, "报告不存在")
+    r = reports[tid]
+    r.radiant_heroes = body.get("radiant_heroes", r.radiant_heroes)
+    r.dire_heroes = body.get("dire_heroes", r.dire_heroes)
+    return r.model_dump()
+
+
 # ─── 静态文件 ───
 try:
     app.mount("/screenshots", StaticFiles(directory=SCREENSHOT_DIR), name="screenshots")

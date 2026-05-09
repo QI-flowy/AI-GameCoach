@@ -22,6 +22,19 @@ class DotaAnalyzer:
         if cb:
             await cb(tid, 10)
 
+        # 阵容识别（第0帧）
+        radiant_heroes = []
+        dire_heroes = []
+        lineup_analysis = ""
+        if meta:
+            try:
+                roster = await self.qwen.analyze_roster(meta[0]["frame_path"])
+                radiant_heroes = roster.get("radiant", [])
+                dire_heroes = roster.get("dire", [])
+                lineup_analysis = roster.get("lineup_analysis", "")
+            except Exception:
+                pass
+
         results = []
         batches = [meta[i:i + BATCH] for i in range(0, len(meta), BATCH)]
         for bi, batch in enumerate(batches):
@@ -76,6 +89,9 @@ class DotaAnalyzer:
             timeline=tl,
             summary=sm.get("summary", ""),
             coach_advice=sm.get("coach_advice", []),
+            radiant_heroes=radiant_heroes,
+            dire_heroes=dire_heroes,
+            lineup_analysis=lineup_analysis,
         )
 
     async def _one(self, fm):

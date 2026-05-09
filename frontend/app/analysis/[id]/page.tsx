@@ -6,12 +6,14 @@ import { useGame } from "@/context/GameContext";
 import VideoPlayer from "@/components/dashboard/VideoPlayer";
 import TimelineSidebar from "@/components/dashboard/TimelineSidebar";
 import AnalysisPanel from "@/components/dashboard/AnalysisPanel";
+import LineupCard from "@/components/dashboard/LineupCard";
+import { updateHeroes } from "@/lib/api-client";
 import { Clock, Loader2 } from "lucide-react";
 
 export default function AnalysisPage() {
   var params = useParams();
   var { selectedGame } = useGame();
-  var { status, report, loading, error } = useDotaAnalysis(params.id as string);
+  var { status, report, loading, error, refreshReport } = useDotaAnalysis(params.id as string);
   var [selectedId, setSelectedId] = useState<number | null>(null);
   var [clipTimestamps, setClipTimestamps] = useState<number[]>([]);
   var [activeClipIdx, setActiveClipIdx] = useState(0);
@@ -74,6 +76,23 @@ export default function AnalysisPage() {
           </p>
         </div>
       </div>
+
+      {/* 阵容卡片 */}
+      {(report.radiant_heroes.length > 0 || report.dire_heroes.length > 0) && (
+        <LineupCard
+          radiantHeroes={report.radiant_heroes}
+          direHeroes={report.dire_heroes}
+          lineupAnalysis={report.lineup_analysis}
+          onSave={async function (r, d) {
+            try {
+              await updateHeroes(params.id as string, r, d);
+              await refreshReport();
+            } catch (e) {
+              console.error("保存失败:", e);
+            }
+          }}
+        />
+      )}
 
       {/* 主内容区 */}
       <div className="grid grid-cols-2 gap-4">

@@ -30,6 +30,9 @@ class DotaAnalysisReport(BaseModel):
     timeline: list[KeyClip] = []
     summary: str = ""
     coach_advice: list[str] = []
+    radiant_heroes: list[str] = []
+    dire_heroes: list[str] = []
+    lineup_analysis: str = ""
     error: Optional[str] = None
 
 

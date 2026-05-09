@@ -44,5 +44,8 @@ export function useDotaAnalysis(initTid?: string) {
     };
   }, [tid]);
 
-  return { tid, status, report, loading, error, start };
+  return { tid, status, report, loading, error, start, refreshReport: async function () {
+    if (!tid) return;
+    try { var r = await getAnalysisReport(tid); setReport(r); } catch {}
+  } };
 }

@@ -13,6 +13,9 @@ SYS = """你是 Dota 2 顶级职业教练。分析比赛录像截图中可见的
 SUMMARY_SYS = """基于逐帧分析JSON数组做全局复盘。
 输出: {"summary":"200字总结","coach_advice":["建议1",...]}"""
 
+ROSTER_SYS = """你是 Dota 2 解说员。根据截图识别天辉(Radiant)和夜魇(Dire)双方的英雄。
+只输出JSON: {"radiant":["英雄1","英雄2","英雄3","英雄4","英雄5"],"dire":["英雄1","英雄2","英雄3","英雄4","英雄5"],"lineup_analysis":"双方阵容风格简评"}"""
+
 def _b64(path):
     ext = Path(path).suffix[1:]
     ext = {"jpg": "jpeg"}.get(ext, ext)
@@ -30,6 +33,15 @@ class QwenClient:
         return await self._call(
             [{"role": "system", "content": SYS}, {"role": "user", "content": content}],
             800, 0.3,
+        )
+
+    async def analyze_roster(self, frame_path):
+        """识别双方阵容"""
+        content = [{"type": "image_url", "image_url": {"url": _b64(frame_path)}}]
+        content.append({"type": "text", "text": "识别这场Dota 2比赛的天辉夜魇英雄。"})
+        return await self._call(
+            [{"role": "system", "content": ROSTER_SYS}, {"role": "user", "content": content}],
+            600, 0.3,
         )
 
     async def generate_summary(self, results):
