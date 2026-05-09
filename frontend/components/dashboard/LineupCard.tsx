@@ -13,11 +13,16 @@ function HeroList({
   heroes,
   editing,
   onChange,
+  side,
 }: {
   heroes: string[];
   editing: boolean;
   onChange: (i: number, v: string) => void;
+  side: "radiant" | "dire";
 }) {
+  if (heroes.length === 0 && !editing) {
+    return <p className="text-xs text-zinc-600">点击编辑填写{side === "radiant" ? "天辉" : "夜魇"}英雄</p>;
+  }
   if (!editing) {
     return (
       <ul className="space-y-0.5">
@@ -27,13 +32,16 @@ function HeroList({
       </ul>
     );
   }
+  // 编辑模式：至少显示5个输入框
+  var items = heroes.length >= 5 ? heroes : [...heroes, ...Array(5 - heroes.length).fill("")];
   return (
     <ul className="space-y-1">
-      {heroes.map((h, i) => (
+      {items.map((h, i) => (
         <li key={i}>
           <input
             className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-0.5 text-sm text-zinc-200"
-            value={h}
+            value={i < heroes.length ? heroes[i] : ""}
+            placeholder={i < heroes.length ? "" : `英雄${i + 1}`}
             onChange={function (e) { onChange(i, e.target.value); }}
           />
         </li>
@@ -98,6 +106,7 @@ export default function LineupCard({ radiantHeroes, direHeroes, lineupAnalysis, 
           <HeroList
             heroes={radiant}
             editing={editing}
+            side="radiant"
             onChange={function (i, v) {
               var h = [...radiant]; h[i] = v; setRadiant(h);
             }}
@@ -111,6 +120,7 @@ export default function LineupCard({ radiantHeroes, direHeroes, lineupAnalysis, 
           <HeroList
             heroes={dire}
             editing={editing}
+            side="dire"
             onChange={function (i, v) {
               var h = [...dire]; h[i] = v; setDire(h);
             }}

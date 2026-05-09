@@ -7,7 +7,7 @@ export function useDotaAnalysis(initTid?: string) {
   var [tid, setTid] = useState<string | null>(initTid || null);
   var [status, setStatus] = useState<AnalysisStatus | null>(null);
   var [report, setReport] = useState<DotaAnalysisReport | null>(null);
-  var [loading, setLoading] = useState(false);
+  var [loading, setLoading] = useState(!!initTid);
   var [error, setError] = useState<string | null>(null);
   var polling = useRef<ReturnType<typeof setInterval> | null>(null);
 

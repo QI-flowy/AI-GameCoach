@@ -24,7 +24,7 @@ export default function TimelineSidebar({ clips, currentTime, onSeekTo }: Props)
           <p className="text-xs text-zinc-500 text-center">分析完成后将显示关键切片</p>
         </div>
       ) : (
-        <div className="max-h-[60vh] overflow-y-auto space-y-1">
+        <div className="space-y-1 max-h-[calc(100vh-6rem)] overflow-y-auto">
           {clips.map(function (c, i) {
             var active = Math.abs(currentTime - c.timestamp) < 2;
             var hi = c.clip_type === "highlight";

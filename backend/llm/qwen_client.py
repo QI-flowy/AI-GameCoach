@@ -51,7 +51,7 @@ class QwenClient:
         )
 
     async def _call(self, msgs, max_tok, temp):
-        async with httpx.AsyncClient(timeout=90) as c:
+        async with httpx.AsyncClient(timeout=180) as c:
             r = await c.post(
                 f"{self.base}/chat/completions",
                 json={

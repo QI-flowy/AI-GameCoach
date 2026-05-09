@@ -22,13 +22,18 @@ class DotaAnalyzer:
         if cb:
             await cb(tid, 10)
 
-        # 阵容识别（第0帧）
+        # 阵容识别（用第2帧避免大厅界面）
         radiant_heroes = []
         dire_heroes = []
         lineup_analysis = ""
-        if meta:
+        roster_frame = None
+        for fm in meta:
+            if fm["timestamp"] >= 60:  # 至少1分钟后，正常游戏已开始
+                roster_frame = fm["frame_path"]
+                break
+        if roster_frame:
             try:
-                roster = await self.qwen.analyze_roster(meta[0]["frame_path"])
+                roster = await self.qwen.analyze_roster(roster_frame)
                 radiant_heroes = roster.get("radiant", [])
                 dire_heroes = roster.get("dire", [])
                 lineup_analysis = roster.get("lineup_analysis", "")
@@ -64,7 +69,9 @@ class DotaAnalyzer:
             }
             for f in results if not f.error
         ]
-        sm = await self.qwen.generate_summary(si)
+        # 总结只传关键帧(评分1/5+带事件)，最多30帧
+        si_key = [s for s in si if s["rating"] in (1, 5) or s.get("key_event")][:30]
+        sm = await self.qwen.generate_summary(si_key or si[:20])
 
         tl = []
         for r in results:

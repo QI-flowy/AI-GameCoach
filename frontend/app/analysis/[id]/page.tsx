@@ -14,12 +14,10 @@ export default function AnalysisPage() {
   var params = useParams();
   var { selectedGame } = useGame();
   var { status, report, loading, error, refreshReport } = useDotaAnalysis(params.id as string);
-  var [selectedId, setSelectedId] = useState<number | null>(null);
   var [clipTimestamps, setClipTimestamps] = useState<number[]>([]);
   var [activeClipIdx, setActiveClipIdx] = useState(0);
   var isDota2 = selectedGame === "dota2";
 
-  // 必须所有 hook 在任何 return 之前
   useEffect(function () {
     if (report && report.timeline.length > 0) {
       setClipTimestamps(report.timeline.map(function (c) { return c.timestamp; }));
@@ -30,7 +28,6 @@ export default function AnalysisPage() {
     setActiveClipIdx(idx);
   }, []);
 
-  // 加载状态
   if (loading) {
     var st = status || { status: "preparing", progress: 0, frames_done: 0, total_frames: 0 };
     return (
@@ -63,65 +60,102 @@ export default function AnalysisPage() {
   var activeClip = report.timeline.length > 0 ? report.timeline[activeClipIdx] : null;
 
   return (
-    <div className="space-y-4">
-      {/* 顶部标题 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{isDota2 ? "⚔️" : "🔫"}</span>
-            <h1 className="text-2xl font-bold">{params.id as string}</h1>
+    <div className="flex flex-col h-screen bg-zinc-950">
+      {/* 顶部栏 */}
+      <div className="flex-shrink-0 border-b border-zinc-800 bg-zinc-900/80 px-4 py-2.5">
+        <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">{isDota2 ? "⚔️" : "🔫"}</span>
+            <div>
+              <h1 className="text-base font-bold text-zinc-100">{params.id as string}</h1>
+              <p className="text-xs text-zinc-500">
+                {Math.round(report.video_duration)}s · {report.total_frames} 帧 · {report.timeline.length} 个关键切片
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-zinc-500 flex items-center gap-2 mt-1">
-            <Clock className="h-4 w-4" /> {Math.round(report.video_duration)}s · {report.total_frames} 帧
-          </p>
         </div>
       </div>
-
-      {/* 阵容卡片 */}
-      {(report.radiant_heroes.length > 0 || report.dire_heroes.length > 0) && (
-        <LineupCard
-          radiantHeroes={report.radiant_heroes}
-          direHeroes={report.dire_heroes}
-          lineupAnalysis={report.lineup_analysis}
-          onSave={async function (r, d) {
-            try {
-              await updateHeroes(params.id as string, r, d);
-              await refreshReport();
-            } catch (e) {
-              console.error("保存失败:", e);
-            }
-          }}
-        />
-      )}
 
       {/* 主内容区 */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* 左侧：视频播放器 */}
-        <VideoPlayer
-          clipTimestamps={clipTimestamps}
-          activeClipIndex={activeClipIdx}
-          onClipTime={function (t: number) {
-            var idx = clipTimestamps.indexOf(t);
-            if (idx >= 0) handleClipClick(idx);
-          }}
-        />
+      <div className="flex-1 overflow-hidden">
+        <div className="flex h-full max-w-screen-xl mx-auto">
+          {/* 左侧：主内容 */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+            {/* 视频播放器 */}
+            <div className="flex-shrink-0">
+              <VideoPlayer
+                clipTimestamps={clipTimestamps}
+                activeClipIndex={activeClipIdx}
+                onClipTime={function (t: number) {
+                  var idx = clipTimestamps.indexOf(t);
+                  if (idx >= 0) handleClipClick(idx);
+                }}
+              />
+            </div>
 
-        {/* 右侧：切片列表 + AI分析 */}
-        <div className="space-y-3">
-          <TimelineSidebar
-            clips={report.timeline}
-            currentTime={activeClip ? activeClip.timestamp : 0}
-            onSeekTo={function (t: number) {
-              if (!report) return;
-              var idx = report.timeline.findIndex(function (c) { return c.timestamp === t; });
-              if (idx >= 0) handleClipClick(idx);
-            }}
-          />
+            {/* AI 总结 + 教练建议 */}
+            {(report.summary || report.coach_advice.length > 0) && (
+              <div className="bg-zinc-900/50 rounded-lg border border-zinc-800 p-3 space-y-3">
+                {report.summary && (
+                  <div>
+                    <p className="text-xs text-emerald-400 font-medium mb-1.5">📝 AI 教练总结</p>
+                    <p className="text-sm text-zinc-200 leading-relaxed">{report.summary}</p>
+                  </div>
+                )}
+                {report.coach_advice.length > 0 && (
+                  <div>
+                    <p className="text-xs text-amber-400 font-medium mb-1.5">💡 教练建议</p>
+                    <div className="space-y-1">
+                      {report.coach_advice.map(function (a, i) {
+                        return (
+                          <p key={i} className="text-xs text-zinc-300 pl-2.5 border-l-2 border-zinc-700 leading-relaxed">
+                            {a}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 阵容卡片 */}
+            <LineupCard
+              radiantHeroes={report.radiant_heroes}
+              direHeroes={report.dire_heroes}
+              lineupAnalysis={report.lineup_analysis}
+              onSave={async function (r, d) {
+                try {
+                  await updateHeroes(params.id as string, r, d);
+                  await refreshReport();
+                } catch (e) {
+                  console.error("保存失败:", e);
+                }
+              }}
+            />
+
+            {/* 6维度分析 */}
+            <div className="pb-4">
+              <AnalysisPanel report={report} activeClip={activeClip} />
+            </div>
+          </div>
+
+          {/* 右侧：时间轴切片 */}
+          <div className="w-64 flex-shrink-0 border-l border-zinc-800 bg-zinc-900/30 overflow-y-auto">
+            <div className="p-3">
+              <TimelineSidebar
+                clips={report.timeline}
+                currentTime={activeClip ? activeClip.timestamp : 0}
+                onSeekTo={function (t: number) {
+                  if (!report) return;
+                  var idx = report.timeline.findIndex(function (c) { return c.timestamp === t; });
+                  if (idx >= 0) handleClipClick(idx);
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* AI 详细分析面板 */}
-      <AnalysisPanel report={report} activeClip={activeClip} />
     </div>
   );
 }
