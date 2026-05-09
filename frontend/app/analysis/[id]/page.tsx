@@ -94,7 +94,7 @@ export default function AnalysisPage() {
             </div>
 
             {/* AI 总结 + 教练建议 */}
-            {(report.summary || report.coach_advice.length > 0) && (
+            {(report.summary || report.coach_advice.length > 0 || activeClip) && (
               <div className="bg-zinc-900/50 rounded-lg border border-zinc-800 p-3 space-y-3">
                 {report.summary && (
                   <div>
@@ -102,7 +102,33 @@ export default function AnalysisPage() {
                     <p className="text-sm text-zinc-200 leading-relaxed">{report.summary}</p>
                   </div>
                 )}
-                {report.coach_advice.length > 0 && (
+                {activeClip && (function () {
+                  var frame = report.frames[activeClip.frame_index];
+                  if (!frame) return null;
+                  var dims = Object.entries(frame.dimensions);
+                  if (dims.length === 0) return null;
+                  var advice = [];
+                  if (frame.type === "mistake") advice.push("⚠️ " + (dims.find(function (d) { return d[0] === "teamfight"; }) ? dims.find(function (d) { return d[0] === "teamfight"; })![1] : ""));
+                  if (frame.type === "highlight") advice.push("⭐ " + (dims.find(function (d) { return d[0] === "teamfight"; }) ? dims.find(function (d) { return d[0] === "teamfight"; })![1] : ""));
+                  var info = dims.filter(function (d) { return d[1]; }).map(function (d) { return d[0] === "items" ? "🛠️ " + d[1] : d[1]; });
+                  info.slice(0, 2).forEach(function (a) { advice.push(a); });
+                  if (advice.length === 0) return null;
+                  return (
+                    <div>
+                      <p className="text-xs text-amber-400 font-medium mb-1.5">💡 当前切片建议</p>
+                      <div className="space-y-1">
+                        {advice.filter(Boolean).map(function (a, i) {
+                          return (
+                            <p key={i} className="text-xs text-zinc-300 pl-2.5 border-l-2 border-amber-700 leading-relaxed">
+                              {a}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+                {!activeClip && report.coach_advice.length > 0 && (
                   <div>
                     <p className="text-xs text-amber-400 font-medium mb-1.5">💡 教练建议</p>
                     <div className="space-y-1">
