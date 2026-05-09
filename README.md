@@ -1,11 +1,9 @@
- AI Game Coach 🎮🧠
+# AI Game Coach 🎮🧠
 
 > AI 驱动的 Dota 2 比赛录像智能复盘分析平台。
 >
 > 上传比赛视频 → **FFmpeg 每 15 秒截图** → **Qwen3.6-35B 多模态视觉分析** → 自动生成战术报告（6 维度评估 + 时间轴关键切片 + 教练建议 + 版本信息）。
 
-
-<img width="2211" height="1947" alt="image" src="https://github.com/user-attachments/assets/9750dff6-6b1f-46d3-9e3c-132075378548" />
 ---
 
 ## ✨ 功能
