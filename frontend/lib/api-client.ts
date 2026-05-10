@@ -1,5 +1,7 @@
 const B = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export const ANALYSIS_DEFAULTS = { interval: 15, batch_size: 8 };
+
 export interface AnalysisStatus {
   task_id: string; status: string; progress: number;
   frames_done: number; total_frames: number; error?: string;
@@ -20,8 +22,8 @@ export interface DotaAnalysisReport {
   error?: string;
 }
 
-export async function startAnalysis(file: File) {
-  var f = new FormData(); f.append("file", file); f.append("game", "dota2");
+export async function startAnalysis(file: File, interval = 15, batchSize = 8) {
+  var f = new FormData(); f.append("file", file); f.append("game", "dota2"); f.append("interval", String(interval)); f.append("batch_size", String(batchSize));
   var r = await fetch(B + "/api/analysis/start", { method: "POST", body: f });
   if (!r.ok) throw new Error(await r.text());
   return r.json();

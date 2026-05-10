@@ -63,10 +63,10 @@ def _load_all_reports():
     return result
 
 
-async def _run(tid, vp):
+async def _run(tid, vp, interval=15, batch_size=8):
     """后台分析任务"""
     try:
-        reports[tid] = await dota_analyzer.analyze_full(tid, vp, _cb)
+        reports[tid] = await dota_analyzer.analyze_full(tid, vp, _cb, interval=interval, batch_size=batch_size)
         _save_report(tid, reports[tid])
     except Exception as e:
         if tid in STATUSES:
@@ -105,6 +105,8 @@ async def health():
 async def start_analysis(
     file: UploadFile = File(...),
     game: str = Form("dota2"),
+    interval: int = Form(15),
+    batch_size: int = Form(8),
 ):
     if not file.filename or not file.filename.lower().endswith(
         (".mp4", ".webm", ".mov", ".avi", ".mkv")
@@ -136,8 +138,8 @@ async def start_analysis(
             os.remove(vp)
         raise HTTPException(400, f"上传失败: {e}")
 
-    asyncio.create_task(_run(tid, vp))
-    return {"task_id": tid, "status": "started"}
+    asyncio.create_task(_run(tid, vp, interval=interval, batch_size=batch_size))
+    return {"task_id": tid, "status": "started", "interval": interval, "batch_size": batch_size}
 
 
 @app.get("/api/analysis/{tid}/status")
@@ -167,7 +169,7 @@ async def analysis_report(tid: str):
 
 
 @app.post("/api/analysis/{tid}/rerun")
-async def rerun_analysis(tid: str):
+async def rerun_analysis(tid: str, interval: int = 15, batch_size: int = 8):
     """重新分析已有视频（无需重新上传）"""
     # 查找已有视频文件
     upload_dir = r"D:\dota-coach\uploads"
@@ -183,8 +185,8 @@ async def rerun_analysis(tid: str):
         shutil.rmtree(ss_dir)
 
     # 启动分析
-    asyncio.create_task(_run(tid, vp))
-    return {"task_id": tid, "status": "started"}
+    asyncio.create_task(_run(tid, vp, interval=interval, batch_size=batch_size))
+    return {"task_id": tid, "status": "started", "interval": interval, "batch_size": batch_size}
 
 
 @app.put("/api/analysis/{tid}/heroes")

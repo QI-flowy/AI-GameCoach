@@ -5,7 +5,7 @@ import DropZone from "@/components/upload/DropZone";
 import UploadProgress from "@/components/upload/UploadProgress";
 import { mockTask, mockDota2Task } from "@/lib/mock-data";
 import { saveVideo } from "@/lib/video-storage";
-import { startAnalysis } from "@/lib/api-client";
+import { startAnalysis, ANALYSIS_DEFAULTS } from "@/lib/api-client";
 import { useGame } from "@/context/GameContext";
 import type { AnalysisTask, TaskStatus } from "@/lib/types";
 
@@ -25,6 +25,9 @@ const GAME_INFO = {
 export default function HomePage() {
   const router = useRouter();
   const { selectedGame } = useGame();
+  const [cfgInterval, setCfgInterval] = useState(ANALYSIS_DEFAULTS.interval);
+  const [cfgBatchSize, setCfgBatchSize] = useState(ANALYSIS_DEFAULTS.batch_size);
+  const [showConfig, setShowConfig] = useState(false);
   const [task, setTask] = useState<AnalysisTask | null>(null);
   const info = GAME_INFO[selectedGame];
 
@@ -34,9 +37,9 @@ export default function HomePage() {
     // 1. 存 IndexedDB
     try { await saveVideo("current", file); } catch (e) { console.error(e); }
 
-    // 2. 上传后端启动分析
+    // 2. 上传后端启动分析（携带可配置参数）
     try {
-      var { task_id } = await startAnalysis(file);
+      var { task_id } = await startAnalysis(file, cfgInterval, cfgBatchSize);
 
       // 3. 模拟进度 + 跳转
       var progress = 0;
@@ -68,6 +71,31 @@ export default function HomePage() {
       <DropZone onFileDrop={handleFileDrop} disabled={!!task} />
 
       {task && <UploadProgress fileName={task.demoFileName} status={task.status} progress={task.progress} />}
+
+      {/* 分析参数配置 */}
+      <div className="text-center">
+        <button onClick={() => setShowConfig(!showConfig)} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+          {showConfig ? "▲ 收起" : "▼ 分析参数配置"}
+        </button>
+        {showConfig && (
+          <div className="mt-2 flex items-center justify-center gap-4 text-xs text-zinc-400">
+            <label>
+              截图间隔:
+              <input type="number" min={5} max={120} value={cfgInterval}
+                onChange={e => setCfgInterval(Number(e.target.value))}
+                className="ml-1 w-14 px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 text-center" />
+              秒
+            </label>
+            <label>
+              每批帧数:
+              <input type="number" min={1} max={32} value={cfgBatchSize}
+                onChange={e => setCfgBatchSize(Number(e.target.value))}
+                className="ml-1 w-12 px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 text-center" />
+              张
+            </label>
+          </div>
+        )}
+      </div>
 
       <p className="text-xs text-zinc-600 text-center">
         上传 MP4 比赛录像 · 仅用于本地分析 · 不会公开分享

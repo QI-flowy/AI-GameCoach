@@ -8,6 +8,7 @@ MODEL = "Qwen3.6-35B-A3B"  # 多模态模型，从 /v1/models 自动检测
 SYS = """你是 Dota 2 顶级职业教练。分析比赛录像截图中可见的信息。
 按6维度分析（各1-2句）：laning, teamfight, items, map_control, roshan, economy。
 同时输出 key_event(null或描述), rating(1-5), type("highlight"/"mistake"/null)。
+注意：英雄名必须与历史上下文保持一致，不要随意更改。
 只输出JSON: {"dimensions":{...},"key_event":"..."|null,"rating":3,"type":"..."|null}"""
 
 SUMMARY_SYS = """基于逐帧分析JSON数组做全局复盘。
@@ -26,10 +27,10 @@ class QwenClient:
     def __init__(self, base=QWEN_BASE, model=MODEL):
         self.base, self.model = base.rstrip("/"), model
 
-    async def analyze_frame(self, frame, prev, nxt, ts):
+    async def analyze_frame(self, frame, prev, nxt, ts, prev_context=""):
         content = [{"type": "image_url", "image_url": {"url": _b64(frame)}}]
         m, s = int(ts // 60), int(ts % 60)
-        content.append({"type": "text", "text": f"时间戳: {m}:{s:02d} ({ts}s)\n按6维度输出JSON。"})
+        content.append({"type": "text", "text": f"时间戳: {m}:{s:02d} ({ts}s)\n{prev_context}\n按6维度输出JSON，英雄名与历史保持一致。"})
         return await self._call(
             [{"role": "system", "content": SYS}, {"role": "user", "content": content}],
             800, 0.3,
